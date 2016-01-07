@@ -1,0 +1,60 @@
+﻿
+@{
+    ViewBag.Title = "Database table display page";
+}
+
+
+
+
+@(Html.Kendo().Grid<JCStratJobApp.Models.people>()
+      .Name("grid")
+      .Columns(columns =>
+      {
+          columns.Bound(person => person.Id).Width(100);
+          columns.Bound(person => person.Name);
+          columns.Bound(person => person.Address);
+          columns.Bound(person => person.Phone_Number).Title("Phone Number");
+
+          columns.Command(commands =>
+          {
+             
+              commands.Destroy(); // The "destroy" command removes data items
+          });
+      })
+      .ToolBar(toolbar => { toolbar.Create(); toolbar.Save(); }) // The "create" command adds new data items in the current view And save updates the database
+      .Editable(editable => editable.Mode(GridEditMode.InCell)) // Use inline editing mode
+      .Sortable()
+      .DataSource(dataSource => dataSource.Ajax()
+            .Events(events => events.Error("error_handler"))
+            .Batch(true)
+            .Model(model =>
+            {
+                model.Id(person =>person.Id); // Specify the property which is the unique identifier of the model
+                model.Field(person => person.Id).Editable(false); // Make the id not able to be edited since ID auto increments
+                
+
+            })
+            
+            .Create(create => create.Action("people_Create", "JCPeople"))// Action invoked when the user saves a new data item
+            .Read(read => read.Action("people_Read", "JCPeople")) // Action invoked when the grid needs data
+            .Update(update => update.Action("people_Update", "JCPeople"))  // Action method invoked when the user saves an updated data item
+            .Destroy(destroy => destroy.Action("people_Destroy", "JCPeople")) // Action invoked when the user removes a data item
+      )
+      .Pageable()
+)
+
+<script type="text/javascript">
+        function error_handler(e) {
+            if (e.errors) {
+                var message = "Errors:\n";
+                $.each(e.errors, function (key, value) {
+                    if ('errors' in value) {
+                        $.each(value.errors, function () {
+                            message += this + "\n";
+                        });
+                    }
+                });
+                alert(message);
+            }
+        }
+</script>

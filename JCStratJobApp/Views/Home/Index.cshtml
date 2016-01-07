@@ -1,0 +1,9 @@
+﻿
+@{
+    ViewBag.Title = "Home Page";
+}
+
+
+@Html.Kendo().DropDownList().Name("Drop").DataSource(dataSource => dataSource .Read(read => read.Action("Index", "People")
+)).DataTextField("Name")
+
