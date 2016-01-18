@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <title>Tryout</title>
+    <title>whaat</title>
 
     <link rel="stylesheet" href="http://kendo.cdn.telerik.com/2015.3.1111/styles/kendo.common-nova.min.css" />
     <link rel="stylesheet" href="http://kendo.cdn.telerik.com/2015.3.1111/styles/kendo.nova.min.css" />
@@ -10,9 +10,9 @@
 </head>
 <body>
 
-    
+
     <div id="JCgrid"></div>
-    <div id="JCgrid2"></div>
+
 
     <script>
             $(document).ready(function () {
@@ -50,45 +50,43 @@
                                 fields: {
                                     Id: { editable: false, nullable: true },
                                     Name: { validation: { required: true } },
-                                    Address: { validation: { required: true} },
-                                    Phone_Number: { validation: {required: true } }
-
+                                    Address: { validation: { required: true } },
+                                    Phone_Number: { validation: { min: 10, required: true } }
                                 }
                             }
                         }
                     });
-                    $("#JCgrid").kendoGrid({
-                        dataSource: dataSource,
-                        navigatable: true,
-                        pageable: true,
-                        height: 550,
-                        toolbar: ["create", "save", "cancel"],
-                        columns: [
-                        { field: "Id", width: 60 },
-                          { field: "Name", width: 120 },
-                          { field: "Address", width: 120 },
-                          { field: "Phone_Number", title: "Phone Number", width: 200 },
-                          { command: ["destroy"], title: "&nbsp;", width: 150 }],
-                        editable: true
-                    });
 
-                $("#JCgrid2").kendoGrid({
+                $("#JCgrid").kendoGrid({
                     dataSource: dataSource,
                     navigatable: true,
                     pageable: true,
                     height: 550,
-                    toolbar: ["create"],
+                    toolbar: ["create", "save", "cancel"],
                     columns: [
-                    { field: "Id", width : 60},
-                      { field: "Name", width: 120 },
+                      "Id",
+                      { field: "Name"},
                       { field: "Address", width: 120 },
-                      { field: "Phone_Number", title: "Phone Number", width: 200 },
-                      { command: ["edit","destroy"], title: "&nbsp;", width: 150 }],
-                    editable: "inline"
+                      { field: "Phone_Number", title: "Phone Number", width: 120 },
+                      { command: "destroy", title: "&nbsp;", width: 150 }],
+                    editable: true
                 });
             });
 
 
+            function error_handler(e) {
+                if (e.errors) {
+                    var message = "Errors:\n";
+                    $.each(e.errors, function (key, value) {
+                        if ('errors' in value) {
+                            $.each(value.errors, function () {
+                                message += this + "\n";
+                            });
+                        }
+                    });
+                    alert(message);
+                }
+            }
     </script>
 
 

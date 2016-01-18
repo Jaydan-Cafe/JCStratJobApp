@@ -6,172 +6,80 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
-using Kendo.Mvc.Extensions;
-using Kendo.Mvc.UI;
 using JCStratJobApp.Models;
 using JCStratJobApp.Data;
-
-
+using System.Web.Script.Serialization;
+using JCStratJobApp.Common;
 namespace JCStratJobApp.Controllers
 {
     public class JCPeopleController : Controller
     {
+
         private JCStratDBEntities db = new JCStratDBEntities();
+
 
         public ActionResult Index()
         {
-            var result = db.TBLPeoples.Select(p => new
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Address = p.Address,
-                Phone_Number = p.Phone_Number
 
+            
+            return this.Jsonp(peopleRepository.All());
 
-            });
-            return View(result);
-          
         }
 
         //Reads the data from the database and returns the information.
-        [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult people_Read([DataSourceRequest]DataSourceRequest request)
+
+        public JsonResult people_Read(int skip, int take)
         {
 
+            IEnumerable<people> result = peopleRepository.All().OrderByDescending(p => p.Id);
+
+            result = result.Skip(skip).Take(take);
+
+            return this.Jsonp(result);
 
 
-            using (var Strat = new JCStratDBEntities())
-            {
-                IQueryable<TBLPeople> people = Strat.TBLPeoples;
-                DataSourceResult result = people.ToDataSourceResult(request);
-                return Json(result);
-            }
 
-
-          
         }
 
 
-        //Handles adding new people to the database
-        [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult people_Create([DataSourceRequest]DataSourceRequest request, [Bind(Prefix = "models")]IEnumerable<people> people)
-        {
-            var entities = new List<TBLPeople>();
-           
-            if (people != null && ModelState.IsValid)
-            {
-                using (var Strat = new JCStratDBEntities())
-                {
-                    foreach (var person in people)
-                    {
-                        
-                        var entity = new TBLPeople
-                        {
-                            Id = person.Id,
-                            Name = person.Name,
-                            Address = person.Address,
-                            Phone_Number = person.Phone_Number
-                        };
-                        // Add the entity
-                        Strat.TBLPeoples.Add(entity);
-                        // Store the entity for later use
-                        entities.Add(entity);
-                    }
-                    // Insert the entities in the database
-                    Strat.SaveChanges();
-                }
-            }
 
-            return Json(entities.ToDataSourceResult(request, ModelState, person => new people
+        public ActionResult people_Create()
+        {
+            var persons = this.DeserializeObject<IEnumerable<people>>("models");
+            if (persons != null)
             {
-                Id = person.Id,
-                Name = person.Name,
-                Address = person.Address,
-                Phone_Number = person.Phone_Number
-            }));
+                peopleRepository.Insert(persons);
+            }
+            return this.Jsonp(persons);
         }
 
-        //Handles updates
-       [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult people_Update([DataSourceRequest]DataSourceRequest request, [Bind(Prefix = "models")]IEnumerable<people> people)
+
+
+
+        public JsonResult people_Update()
         {
-
-            var entities = new List<TBLPeople>();
-          
-            if (people != null && ModelState.IsValid)
+            var models = this.DeserializeObject<IEnumerable<people>>("models");
+            if (models != null)
             {
-                using (var Strat = new JCStratDBEntities())
-                {
-                    foreach (var person in people)
-                    {
-
-                        var entity = new TBLPeople
-                        {
-                            Id = person.Id,
-                            Name = person.Name,
-                            Address = person.Address,
-                            Phone_Number = person.Phone_Number
-                        };
-                        
-                       
-                        Strat.TBLPeoples.Attach(entity);
-                        Strat.Entry(entity).State = EntityState.Modified;
-
-                    }
-                    // Insert the entities in the database
-                    Strat.SaveChanges();
-                }
+                peopleRepository.Update(models);
             }
-
-            return Json(entities.ToDataSourceResult(request, ModelState, person => new people
-            {
-                Id = person.Id,
-                Name = person.Name,
-                Address = person.Address,
-                Phone_Number = person.Phone_Number
-            }));
+            return this.Jsonp(models);
 
         }
-        //Handles deletetion
-        [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult people_Destroy([DataSourceRequest]DataSourceRequest request, [Bind(Prefix = "models")]IEnumerable<people> people)
+
+
+        public ActionResult people_Destroy()
         {
-            var entities = new List<TBLPeople>();
-            
-            if (people != null && ModelState.IsValid)
+            var persons = this.DeserializeObject<IEnumerable<people>>("models");
+
+            if (persons != null)
             {
-                using (var Strat = new JCStratDBEntities())
-                {
-                    foreach (var person in people)
-                    {
-
-                        var entity = new TBLPeople
-                        {
-                            Id = person.Id,
-                            Name = person.Name,
-                            Address = person.Address,
-                            Phone_Number = person.Phone_Number
-                        };
-
-                        //entities.Add(entity);
-                        Strat.TBLPeoples.Attach(entity);
-                        Strat.TBLPeoples.Remove(entity);
-
-                    }
-                    // Delete the entities in the database
-                    Strat.SaveChanges();
-                }
+                peopleRepository.Delete(persons);
             }
-
-            return Json(entities.ToDataSourceResult(request, ModelState, person => new people
-            {
-                Id = person.Id,
-                Name = person.Name,
-                Address = person.Address,
-                Phone_Number = person.Phone_Number
-            }));
+            return this.Jsonp(persons);
 
         }
+
 
         protected override void Dispose(bool disposing)
         {
@@ -180,3 +88,4 @@ namespace JCStratJobApp.Controllers
         }
     }
 }
+
